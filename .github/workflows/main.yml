@@ -1,0 +1,25 @@
+name: Validacao de Seguranca da Sprint 4
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  analise-sast:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v3
+
+      - name: Rodar Semgrep no código VULNERÁVEL (esperamos que falhe)
+        uses: returntocorp/semgrep-action@v1
+        with:
+          # Este comando força o pipeline a falhar se encontrar algo
+          # O arquivo que escaneamos é o app-vulneravel.js
+          args: --error --config=auto ./app-vulneravel.js
+
+      - name: Rodar Semgrep no código CORRIGIDO (esperamos que passe)
+        uses: returntocorp/semgrep-action@v1
+        with:
+          # Aqui escaneamos o arquivo corrigido
+          args: --config=auto ./app-corrigido.js
