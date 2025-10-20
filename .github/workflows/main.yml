@@ -13,7 +13,7 @@ jobs:
 
       - name: Rodar Semgrep no código VULNERÁVEL (esperamos que falhe)
         uses: returntocorp/semgrep-action@v1
-        continue-on-error: true  # ADICIONE ESTA LINHA
+        continue-on-error: true
         with:
           args: --error --config=auto ./app-vulneravel.js
 
