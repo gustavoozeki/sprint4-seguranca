@@ -5,19 +5,32 @@ on:
     branches: [ main ]
 
 jobs:
-  analise-sast:
+  # Job 1: Provar que a ferramenta ENCONTRA o erro no código antigo
+  analise-codigo-vulneravel:
     runs-on: ubuntu-latest
+    # Este job PODE falhar, e está tudo bem.
+    continue-on-error: true
     steps:
       - name: Checkout do código
         uses: actions/checkout@v3
 
-      - name: Rodar Semgrep no código VULNERÁVEL (esperamos que falhe)
-        uses: returntocorp/semgrep-action@v1
-        continue-on-error: true
-        with:
-          args: --error --config=auto ./app-vulneravel.js
+      - name: Instalar e rodar o Semgrep
+        run: |
+          pip install semgrep
+          # Rodamos o Semgrep esperando um erro (--error) no arquivo vulnerável
+          semgrep --config=auto --error ./app-vulneravel.js
 
-      - name: Rodar Semgrep no código CORRIGIDO (esperamos que passe)
-        uses: returntocorp/semgrep-action@v1
-        with:
-          args: --config=auto ./app-corrigido.js
+  # Job 2: Provar que o erro NÃO EXISTE MAIS no código novo
+  analise-codigo-corrigido:
+    runs-on: ubuntu-latest
+    # Este job precisa do Job 1 para terminar, mesmo que ele falhe
+    needs: analise-codigo-vulneravel
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v3
+
+      - name: Instalar e rodar o Semgrep
+        run: |
+          pip install semgrep
+          # Rodamos o Semgrep no arquivo corrigido, aqui ele deve passar
+          semgrep --config=auto ./app-corrigido.js
